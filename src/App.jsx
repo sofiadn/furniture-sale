@@ -227,19 +227,19 @@ function InterestedModal({ item, onClose, onSubmitted }) {
         <div className="field-hint">Fill this out and Sofia will get back to you.</div>
         <label className="field">
           <span>Your name</span>
-          <input value={name} onChange={e => setName(e.target.value)} autoFocus required />
+          <input value={name} onChange={e => setName(e.target.value)} autoFocus required maxLength={80} />
         </label>
         <label className="field">
           <span>Email or phone — optional</span>
-          <input value={contact} onChange={e => setContact(e.target.value)} placeholder="you@example.com" />
+          <input value={contact} onChange={e => setContact(e.target.value)} placeholder="you@example.com" maxLength={120} />
         </label>
         <label className="field">
           <span>Your offer ($) — optional</span>
-          <input type="number" min="0" step="1" value={offer} onChange={e => setOffer(e.target.value)} placeholder={formatPrice(item.price)} />
+          <input type="number" min="0" max="999999" step="1" value={offer} onChange={e => setOffer(e.target.value)} placeholder={formatPrice(item.price)} />
         </label>
         <label className="field">
           <span>Message (optional)</span>
-          <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3} placeholder="When can you pick it up? Any questions?" />
+          <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3} placeholder="When can you pick it up? Any questions?" maxLength={500} />
         </label>
         {error && <span className="field-hint error">{error}</span>}
         <div className="form-actions">
