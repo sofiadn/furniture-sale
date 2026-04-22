@@ -197,7 +197,7 @@ function InterestedModal({ item, onClose, onSubmitted }) {
 
   async function submit(e) {
     e.preventDefault()
-    if (!name.trim() || !contact.trim()) return
+    if (!name.trim()) return
     setSubmitting(true)
     setError('')
     if (!supabase) {
@@ -230,8 +230,8 @@ function InterestedModal({ item, onClose, onSubmitted }) {
           <input value={name} onChange={e => setName(e.target.value)} autoFocus required />
         </label>
         <label className="field">
-          <span>Email or phone</span>
-          <input value={contact} onChange={e => setContact(e.target.value)} placeholder="you@example.com" required />
+          <span>Email or phone — optional</span>
+          <input value={contact} onChange={e => setContact(e.target.value)} placeholder="you@example.com" />
         </label>
         <label className="field">
           <span>Your offer ($) — optional</span>
