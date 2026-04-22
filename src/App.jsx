@@ -187,18 +187,6 @@ function ItemForm({ initial, onSave, onCancel }) {
   )
 }
 
-function notifySeller(payload) {
-  fetch(`https://formsubmit.co/ajax/${SELLER_EMAIL}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({
-      _subject: `New offer on "${payload.item}"`,
-      _template: 'table',
-      ...payload,
-    }),
-  }).catch(() => {})
-}
-
 function InterestedModal({ item, onClose, onSubmitted }) {
   const [name, setName] = useState('')
   const [contact, setContact] = useState('')
@@ -229,13 +217,6 @@ function InterestedModal({ item, onClose, onSubmitted }) {
       setError(insertError.message || 'Could not send — try again.')
       return
     }
-    notifySeller({
-      item: item.name,
-      name: name.trim(),
-      contact: contact.trim() || '(not provided)',
-      offer: offer === '' ? '(no offer)' : `$${offer}`,
-      message: message.trim() || '(no message)',
-    })
     onSubmitted()
   }
 
