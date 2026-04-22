@@ -3,7 +3,7 @@ import bakedItems from './items.json'
 import { supabase } from './supabase'
 import './App.css'
 
-const STORAGE_KEY = 'furniture-sale-items-v3'
+const STORAGE_KEY = 'furniture-sale-items-v4'
 const ADMIN_KEY = 'furniture-sale-admin'
 const SELLER_EMAIL = 'sofianaydenovad@gmail.com'
 
@@ -44,9 +44,11 @@ function saveItems(items) {
 }
 
 function formatPrice(p) {
-  if (p === '' || p == null || isNaN(Number(p))) return 'Make an offer'
+  if (p === '' || p == null || isNaN(Number(p))) return ''
   return `$${Number(p).toLocaleString()}`
 }
+
+const CATEGORY_ORDER = ['Furniture', 'Appliances', 'Bedding', 'Home', 'Tech', 'Misc']
 
 function amazonAsinImage(url) {
   const m = url.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i)
@@ -100,6 +102,7 @@ function ItemForm({ initial, onSave, onCancel }) {
   const [link, setLink] = useState(initial?.link ?? '')
   const [image, setImage] = useState(initial?.image ?? '')
   const [note, setNote] = useState(initial?.note ?? '')
+  const [category, setCategory] = useState(initial?.category ?? 'Misc')
   const [uploadError, setUploadError] = useState('')
   const [uploading, setUploading] = useState(false)
 
@@ -131,6 +134,7 @@ function ItemForm({ initial, onSave, onCancel }) {
       link: link.trim(),
       image: imageChanged ? image.trim() : linkChanged ? '' : (initial?.image ?? ''),
       note: note.trim(),
+      category,
     })
   }
 
@@ -143,8 +147,14 @@ function ItemForm({ initial, onSave, onCancel }) {
           <input value={name} onChange={e => setName(e.target.value)} placeholder="Oak dining table" autoFocus />
         </label>
         <label className="field">
-          <span>Price ($) — leave blank for "Make an offer"</span>
+          <span>Price ($) — leave blank to hide</span>
           <input type="number" min="0" step="1" value={price} onChange={e => setPrice(e.target.value)} placeholder="150" />
+        </label>
+        <label className="field">
+          <span>Category</span>
+          <select value={category} onChange={e => setCategory(e.target.value)}>
+            {CATEGORY_ORDER.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
         </label>
         <label className="field">
           <span>Link (image is auto-pulled for Amazon /dp links)</span>
@@ -258,12 +268,12 @@ function ItemCard({ item, loading, admin, onEdit, onDelete, onInterested }) {
       </div>
       <div className="card-body">
         <div className="card-name">{item.name}</div>
-        <div className="card-price">{formatPrice(item.price)}</div>
+        {formatPrice(item.price) && <div className="card-price">{formatPrice(item.price)}</div>}
         {item.note && <div className="card-note">{item.note}</div>}
         <div className="card-actions">
           <button className="btn btn-primary" onClick={() => onInterested(item)}>Interested</button>
           {item.link ? (
-            <a className="btn btn-ghost" href={item.link} target="_blank" rel="noreferrer">View link</a>
+            <a className="btn btn-ghost" href={item.link} target="_blank" rel="noreferrer">View original</a>
           ) : (
             <span className="btn btn-ghost disabled">No link</span>
           )}
@@ -433,7 +443,7 @@ export default function App() {
     <div className="page">
       <header className="topbar">
         <div>
-          <h1 className="title">Sofia's Furniture Sale</h1>
+          <h1 className="title">Sofia's Moving Sale</h1>
           <div className="subtitle">
             {items.length} {items.length === 1 ? 'item' : 'items'} available · pickup in person
             {admin && <span className="admin-pill">admin</span>}
@@ -455,19 +465,36 @@ export default function App() {
           <div className="empty-sub">{admin ? 'Click "Add item" to list your first piece of furniture.' : 'Check back soon!'}</div>
         </div>
       ) : (
-        <div className="grid">
-          {items.map(item => (
-            <ItemCard
-              key={item.id}
-              item={item}
-              loading={loadingIds.has(item.id)}
-              admin={admin}
-              onEdit={setEditing}
-              onDelete={handleDelete}
-              onInterested={setInterested}
-            />
-          ))}
-        </div>
+        (() => {
+          const byCat = {}
+          items.forEach(i => {
+            const c = i.category || 'Misc'
+            if (!byCat[c]) byCat[c] = []
+            byCat[c].push(i)
+          })
+          const ordered = [
+            ...CATEGORY_ORDER.filter(c => byCat[c]),
+            ...Object.keys(byCat).filter(c => !CATEGORY_ORDER.includes(c)),
+          ]
+          return ordered.map(cat => (
+            <section key={cat} className="category">
+              <h2 className="category-title">{cat} <span className="category-count">{byCat[cat].length}</span></h2>
+              <div className="grid">
+                {byCat[cat].map(item => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    loading={loadingIds.has(item.id)}
+                    admin={admin}
+                    onEdit={setEditing}
+                    onDelete={handleDelete}
+                    onInterested={setInterested}
+                  />
+                ))}
+              </div>
+            </section>
+          ))
+        })()
       )}
 
       {editing && (
