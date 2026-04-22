@@ -190,7 +190,7 @@ function ItemForm({ initial, onSave, onCancel }) {
 function InterestedModal({ item, onClose, onSubmitted }) {
   const [name, setName] = useState('')
   const [contact, setContact] = useState('')
-  const [offer, setOffer] = useState('')
+  const [offer, setOffer] = useState('10')
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
